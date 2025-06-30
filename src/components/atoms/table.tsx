@@ -10,8 +10,8 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { cn } from '@/utils/lib'
-import ArrayMap from './atoms/ArrayMap'
 import { Else, If } from './atoms/if'
+import ArrayMap from './ArrayMap'
 
 interface Fields {
   key: string
