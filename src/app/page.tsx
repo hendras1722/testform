@@ -32,11 +32,9 @@ import { cn } from '@/utils/lib'
 import { useEffect, useState } from 'react'
 import { Textarea } from '@/components/ui/textarea'
 import { moneyRupiah } from '@/utils/moneyRupiah'
+import ArrayMap from '@/components/atoms/ArrayMap'
 
 const FormSchema = z.object({
-  country: z.string().min(2, {
-    message: 'country must be at least 2 characters.',
-  }),
   negara: z.string({
     required_error: 'Please select a country.',
   }),
@@ -89,11 +87,11 @@ export default function InputForm() {
     total: '',
   })
   const [disabled, setDisabled] = useState(true)
+  const [data, setData] = useState<any>([])
 
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      country: '',
       discount: '',
       price: '',
       total: '',
@@ -187,6 +185,11 @@ export default function InputForm() {
         form.setValue('price', formattedPrice)
 
         const total = calculateTotal(formattedDiscount, formattedPrice)
+        setCount((prevState) => ({
+          ...count,
+          total: total,
+          description: description ?? '',
+        }))
         form.setValue('total', total)
       }
     }
@@ -196,6 +199,10 @@ export default function InputForm() {
     if (watchedDiscount !== undefined && watchedPrice !== undefined) {
       const total = calculateTotal(watchedDiscount, watchedPrice)
       form.setValue('total', total)
+      setCount((prevState) => ({
+        ...count,
+        total: total,
+      }))
     }
   }, [watchedDiscount, watchedPrice])
 
@@ -206,283 +213,335 @@ export default function InputForm() {
   function onSubmit(data: z.infer<typeof FormSchema>) {
     console.log(count)
     console.log(data)
-    // toast('You submitted the following values', {
-    //   description: (
-    //     <pre className="mt-2 w-[320px] rounded-md bg-neutral-950 p-4">
-    //       <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-    //     </pre>
-    //   ),
-    // })
+    setData((prevState) => [...prevState, count])
+    setCount({
+      negara: '',
+      port: '',
+      items: '',
+      description: '',
+      discount: '',
+      price: '',
+      total: '',
+    })
+
+    form.reset({
+      discount: '',
+      price: '',
+      total: '',
+    })
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6">
-        <FormField
-          control={form.control}
-          name="negara"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Country</FormLabel>
-              <Popover open={open} onOpenChange={setOpen}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={open}
-                      className={cn(
-                        'w-[200px] justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? country.find(
-                            (language) =>
-                              String(language.id_negara) === String(field.value)
-                          )?.kode_negara +
-                          ' - ' +
-                          country.find(
-                            (language) =>
-                              String(language.id_negara) === String(field.value)
-                          )?.nama_negara
-                        : 'Select Country'}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search country..."
-                      className="h-9"
-                    />
-                    <CommandEmpty>No country found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>
-                        {country.map((item) => (
-                          <CommandItem
-                            value={String(item.id_negara)}
-                            key={item.id_negara}
-                            onSelect={() => {
-                              field.onChange(String(item.id_negara))
-                              setOpen(false)
-                            }}
+    <>
+      <div className="py-10 overflow-auto mb-5">
+        <div className="mx-[20px] shadow-lg p-5 rounded-lg">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="w-2/3 space-y-6"
+            >
+              <FormField
+                control={form.control}
+                name="negara"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Country</FormLabel>
+                    <Popover open={open} onOpenChange={setOpen}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={open}
+                            className={cn(
+                              'w-[200px] justify-between',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {item.kode_negara} - {item.nama_negara}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                            {field.value
+                              ? country.find(
+                                  (language) =>
+                                    String(language.id_negara) ===
+                                    String(field.value)
+                                )?.kode_negara +
+                                ' - ' +
+                                country.find(
+                                  (language) =>
+                                    String(language.id_negara) ===
+                                    String(field.value)
+                                )?.nama_negara
+                              : 'Select Country'}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search country..."
+                            className="h-9"
+                          />
+                          <CommandEmpty>No country found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                              {country.map((item) => (
+                                <CommandItem
+                                  value={String(item.id_negara)}
+                                  key={item.id_negara}
+                                  onSelect={() => {
+                                    field.onChange(String(item.id_negara))
+                                    setOpen(false)
+                                  }}
+                                >
+                                  {item.kode_negara} - {item.nama_negara}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          control={form.control}
-          name="port"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Port</FormLabel>
-              <Popover open={openPort} onOpenChange={setOpenPort}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={openPort}
-                      className={cn(
-                        'w-[200px] justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? port.find(
-                            (item) =>
-                              String(item.id_pelabuhan) === String(field.value)
-                          )?.nama_pelabuhan
-                        : 'Select Port'}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search port..."
-                      className="h-9"
-                    />
-                    <CommandEmpty>No port found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>
-                        {port.map((item) => (
-                          <CommandItem
-                            value={String(item.id_pelabuhan)}
-                            key={item.id_pelabuhan}
-                            onSelect={() => {
-                              field.onChange(String(item.id_pelabuhan))
-                              setOpenPort(false)
-                            }}
+              <FormField
+                control={form.control}
+                name="port"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Port</FormLabel>
+                    <Popover open={openPort} onOpenChange={setOpenPort}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openPort}
+                            className={cn(
+                              'w-[200px] justify-between',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {item.nama_pelabuhan}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+                            {field.value
+                              ? port.find(
+                                  (item) =>
+                                    String(item.id_pelabuhan) ===
+                                    String(field.value)
+                                )?.nama_pelabuhan
+                              : 'Select Port'}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search port..."
+                            className="h-9"
+                          />
+                          <CommandEmpty>No port found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                              {port.map((item) => (
+                                <CommandItem
+                                  value={String(item.id_pelabuhan)}
+                                  key={item.id_pelabuhan}
+                                  onSelect={() => {
+                                    field.onChange(String(item.id_pelabuhan))
+                                    setOpenPort(false)
+                                  }}
+                                >
+                                  {item.nama_pelabuhan}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-        <FormField
-          control={form.control}
-          name="items"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Barang</FormLabel>
-              <Popover open={openItem} onOpenChange={setOpenItem}>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={openItem}
-                      className={cn(
-                        'w-[200px] justify-between',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value
-                        ? items.find(
-                            (language) =>
-                              String(language.id_barang) === String(field.value)
-                          )?.nama_barang
-                        : 'Select items'}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-[200px] p-0">
-                  <Command>
-                    <CommandInput
-                      placeholder="Search items..."
-                      className="h-9"
-                    />
-                    <CommandEmpty>No item found.</CommandEmpty>
-                    <CommandList>
-                      <CommandGroup>
-                        {items.map((item) => (
-                          <CommandItem
-                            value={String(item.id_barang)}
-                            key={item.id_barang}
-                            onSelect={() => {
-                              field.onChange(String(item.id_barang))
-                              setOpenItem(false)
-                            }}
+              <FormField
+                control={form.control}
+                name="items"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Barang</FormLabel>
+                    <Popover open={openItem} onOpenChange={setOpenItem}>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={openItem}
+                            className={cn(
+                              'w-[200px] justify-between',
+                              !field.value && 'text-muted-foreground'
+                            )}
                           >
-                            {item.nama_barang}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </CommandList>
-                  </Command>
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
+                            {field.value
+                              ? items.find(
+                                  (language) =>
+                                    String(language.id_barang) ===
+                                    String(field.value)
+                                )?.nama_barang
+                              : 'Select items'}
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-[200px] p-0">
+                        <Command>
+                          <CommandInput
+                            placeholder="Search items..."
+                            className="h-9"
+                          />
+                          <CommandEmpty>No item found.</CommandEmpty>
+                          <CommandList>
+                            <CommandGroup>
+                              {items.map((item) => (
+                                <CommandItem
+                                  value={String(item.id_barang)}
+                                  key={item.id_barang}
+                                  onSelect={() => {
+                                    field.onChange(String(item.id_barang))
+                                    setOpenItem(false)
+                                  }}
+                                >
+                                  {item.nama_barang}
+                                </CommandItem>
+                              ))}
+                            </CommandGroup>
+                          </CommandList>
+                        </Command>
+                      </PopoverContent>
+                    </Popover>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Textarea
+                value={count.description}
+                onChange={() => {}}
+                placeholder="Description"
+                readOnly
+              />
+
+              <FormField
+                control={form.control}
+                name="discount"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Discount</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={disabled}
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement
+                          if (!input.value.match(/^\d+$/gm))
+                            return (input.value = '')
+
+                          field.onChange(input.value)
+                        }}
+                        placeholder="Input discount"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={disabled}
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement
+                          if (!input.value) return (input.value = '')
+                          const value = moneyRupiah(input.value)
+                          if (value === '') return (input.value = '')
+                          input.value = value.replace(
+                            /\B(?=(\d{3})+(?!\d))/g,
+                            '.'
+                          )
+                          field.onChange(input.value)
+                        }}
+                        placeholder="Input price"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="total"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Total</FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled
+                        placeholder="Total amount"
+                        {...field}
+                        readOnly
+                        onInput={(e) => {
+                          const input = e.target as HTMLInputElement
+                          if (!input.value) return (input.value = '')
+                          const value = moneyRupiah(input.value)
+                          if (value === '') return (input.value = '')
+                          input.value = value.replace(
+                            /\B(?=(\d{3})+(?!\d))/g,
+                            '.'
+                          )
+                          field.onChange(input.value)
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit">Submit</Button>
+            </form>
+          </Form>
+        </div>
+      </div>
+      <div>
+        <ArrayMap
+          of={data ?? []}
+          render={(item: typeof count, index: number) => (
+            <div
+              key={index}
+              className="flex flex-col p-4 border-b w-fit shadow-lg mt-5 ml-5"
+            >
+              <div>{item.negara}</div>
+              <div>{item.description}</div>
+              <div>
+                {(typeof item.total === 'number'
+                  ? item.total
+                  : Number(String(item.total).replace(/[^\d.-]/g, ''))
+                ).toLocaleString('id-ID', {
+                  style: 'currency',
+                  currency: 'IDR',
+                })}
+              </div>
+            </div>
           )}
         />
-
-        <Textarea
-          value={count.description}
-          onChange={() => {}}
-          placeholder="Description"
-          readOnly
-        />
-
-        <FormField
-          control={form.control}
-          name="discount"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Discount</FormLabel>
-              <FormControl>
-                <Input
-                  disabled={disabled}
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    if (!input.value.match(/^\d+$/gm)) return (input.value = '')
-
-                    field.onChange(input.value)
-                  }}
-                  placeholder="Input discount"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="price"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Price</FormLabel>
-              <FormControl>
-                <Input
-                  disabled={disabled}
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    if (!input.value) return (input.value = '')
-                    const value = moneyRupiah(input.value)
-                    if (value === '') return (input.value = '')
-                    input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-                    field.onChange(input.value)
-                  }}
-                  placeholder="Input price"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="total"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Total</FormLabel>
-              <FormControl>
-                <Input
-                  disabled
-                  placeholder="Total amount"
-                  {...field}
-                  readOnly
-                  onInput={(e) => {
-                    const input = e.target as HTMLInputElement
-                    if (!input.value) return (input.value = '')
-                    const value = moneyRupiah(input.value)
-                    if (value === '') return (input.value = '')
-                    input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-                    field.onChange(input.value)
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <Button type="submit">Submit</Button>
-      </form>
-    </Form>
+      </div>
+    </>
   )
 }
