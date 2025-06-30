@@ -276,7 +276,7 @@ export default function InputForm() {
                 name="negara"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Country</FormLabel>
+                    <FormLabel>Negara</FormLabel>
                     <Popover open={open} onOpenChange={setOpen}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -341,7 +341,7 @@ export default function InputForm() {
                 name="port"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Port</FormLabel>
+                    <FormLabel>Pelabuhan</FormLabel>
                     <Popover open={openPort} onOpenChange={setOpenPort}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -491,7 +491,7 @@ export default function InputForm() {
                 name="price"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Price</FormLabel>
+                    <FormLabel>Harga</FormLabel>
                     <FormControl>
                       <Input
                         disabled={disabled}
