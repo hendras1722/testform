@@ -180,9 +180,27 @@ export default function InputForm() {
 
         const formattedDiscount = moneyRupiah(String(diskon || '0'))
         const formattedPrice = moneyRupiah(String(harga || '0'))
-
-        form.setValue('discount', formattedDiscount)
-        form.setValue('price', formattedPrice)
+        String(
+          Number(String(formattedPrice).replace(/[^\d.-]/g, '')).toLocaleString(
+            'id-ID'
+          )
+        )
+        form.setValue(
+          'discount',
+          String(
+            Number(
+              String(formattedDiscount).replace(/[^\d.-]/g, '')
+            ).toLocaleString('id-ID')
+          )
+        )
+        form.setValue(
+          'price',
+          String(
+            Number(
+              String(formattedPrice).replace(/[^\d.-]/g, '')
+            ).toLocaleString('id-ID')
+          )
+        )
 
         const total = calculateTotal(formattedDiscount, formattedPrice)
         setCount((prevState) => ({
@@ -190,7 +208,15 @@ export default function InputForm() {
           total: total,
           description: description ?? '',
         }))
-        form.setValue('total', total)
+
+        form.setValue(
+          'total',
+          String(
+            Number(String(total).replace(/[^\d.-]/g, '')).toLocaleString(
+              'id-ID'
+            )
+          )
+        )
       }
     }
   }, [watchedItems, items])
@@ -198,7 +224,12 @@ export default function InputForm() {
   useEffect(() => {
     if (watchedDiscount !== undefined && watchedPrice !== undefined) {
       const total = calculateTotal(watchedDiscount, watchedPrice)
-      form.setValue('total', total)
+      form.setValue(
+        'total',
+        String(
+          Number(String(total).replace(/[^\d.-]/g, '')).toLocaleString('id-ID')
+        )
+      )
       setCount((prevState) => ({
         ...count,
         total: total,
