@@ -38,17 +38,21 @@ export const If: React.FC<{
         // Clone Else with our ID
         elseChildren.push(
           React.cloneElement(child, {
-            ...child.props,
+            ...(typeof child.props === 'object' && child.props
+              ? child.props
+              : {}),
             ifParentId: id,
-          })
+          } as any)
         )
       } else if (child.type === ElseIf) {
         // Clone ElseIf with our ID
         elseChildren.push(
           React.cloneElement(child, {
-            ...child.props,
+            ...(typeof child.props === 'object' && child.props
+              ? child.props
+              : {}),
             ifParentId: id,
-          })
+          } as any)
         )
       } else {
         regularChildren.push(child)
